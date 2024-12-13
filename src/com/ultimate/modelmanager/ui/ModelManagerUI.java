@@ -5,9 +5,11 @@ import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.json.JSONObject;
@@ -22,15 +24,19 @@ import java.util.List;
 public class ModelManagerUI extends Application {
 	// This will store the models during the user session
     private final ObservableList<Model> models = FXCollections.observableArrayList();
+    // Used for the save function
+    File saveFile = null;
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("Model Manager");
+        primaryStage.setTitle("ULTIMATE Model Manager");
 
         // Layouts
         BorderPane root = new BorderPane();
-        VBox controlPanel = new VBox(10);
-        controlPanel.setPadding(new Insets(10));
+
+        // Text box to display model information
+        Text modelDetails = new Text();
+        root.setCenter(modelDetails);
 
         // ListView to display models
         ListView<Model> modelListView = new ListView<>(models);
@@ -41,21 +47,82 @@ public class ModelManagerUI extends Application {
                 setText(empty || item == null ? null : item.getModelId());
             }
         });
-        root.setCenter(modelListView);
+        
+        // Add a listener to handle selection changes
+        modelListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                modelDetails.setText(updateModelDetails(newValue)); // Call your method with the newly selected item
+            }
+        });
+        
+        // VBox for buttons and list view
+        VBox vbox = new VBox(10); // 10-pixel spacing between elements
+        vbox.setStyle("-fx-border-width: 2px; -fx-padding: 5px;");
 
-        // Buttons for actions
-        Button addModelButton = new Button("Add New Model");
-        Button editModelButton = new Button("Edit Selected Model");
-        Button deleteModelButton = new Button("Delete Selected Model");
-        Button saveModelsButton = new Button("Save Models to File");
-        Button loadModelsButton = new Button("Load Models from File");
+        // Create an HBox for the buttons (arrange horizontally)
+        HBox hbox = new HBox(10); // 10-pixel spacing between buttons
+        // Centre the buttons horizontally
+        hbox.setAlignment(Pos.CENTER);
+        // Apply a border to the HBox
+        hbox.setStyle("-fx-border-width: 2px; -fx-padding: 5px;");
 
-        // **New Button to View Model Details**
-        Button viewModelDetailsButton = new Button("View Model Details");
+        // Buttons
+        Button addModelButton = new Button("+");
+        Button upButton = new Button("↑");
+        Button downButton = new Button("↓");
 
-        controlPanel.getChildren().addAll(addModelButton, editModelButton, deleteModelButton, saveModelsButton, loadModelsButton, viewModelDetailsButton); // Added new button here
-        root.setLeft(controlPanel);
+        // Add event handlers for the buttons
+        addModelButton.setOnAction(e -> openModelEditor(primaryStage, null));
 
+        upButton.setOnAction(e -> {
+            // Handle the "Up" button action
+            int selectedIndex = modelListView.getSelectionModel().getSelectedIndex();
+            if (selectedIndex > 0) {
+                // Select the item just above the current one
+                modelListView.getSelectionModel().select(selectedIndex - 1);
+            }
+        });
+
+        downButton.setOnAction(e -> {
+            // Handle the "Down" button action
+            int selectedIndex = modelListView.getSelectionModel().getSelectedIndex();
+            if (selectedIndex < models.size() - 1) {
+                // Select the item just below the current one
+                modelListView.getSelectionModel().select(selectedIndex + 1);
+            }
+        });
+
+        // Add buttons to the HBox
+        hbox.getChildren().addAll(addModelButton, upButton, downButton);
+
+        // Add the HBox for buttons and the ListView to the VBox
+        vbox.getChildren().addAll(hbox, modelListView);
+
+        // Ensure the ListView fills the remaining vertical space in the VBox
+        VBox.setVgrow(modelListView, Priority.ALWAYS);
+
+        // Set the VBox to the left side of the BorderPane
+        root.setLeft(vbox);
+
+        
+        // Menu Bar
+        MenuBar menuBar = new MenuBar();
+
+        // "File" Menu
+        Menu fileMenu = new Menu("File");
+        MenuItem loadItem = new MenuItem("Load");
+        MenuItem saveItem = new MenuItem("Save");
+        MenuItem saveAsItem = new MenuItem("Save As");
+        MenuItem quitItem = new MenuItem("Quit");
+        fileMenu.getItems().addAll(loadItem, saveItem, saveAsItem, quitItem);
+
+        // Add menus to the MenuBar
+        menuBar.getMenus().addAll(fileMenu);
+
+        // Set the menu bar at the top of the window
+        root.setTop(menuBar);
+
+        /**
         // Button actions
         addModelButton.setOnAction(e -> openModelEditor(primaryStage, null));
 
@@ -76,22 +143,8 @@ public class ModelManagerUI extends Application {
                 showAlert("No Selection", "Please select a model to delete.");
             }
         });
-
-        saveModelsButton.setOnAction(e -> {
-            // Assuming 'models' is the ObservableList of Model objects you want to save
-            List<Model> modelList = models;  // Convert ObservableList to List
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JSON Files", "*.json"));
-            File file = fileChooser.showSaveDialog(primaryStage);  // Let user choose file path
-
-            if (file != null) {
-                saveModelsToFile(modelList, file.getAbsolutePath());  // Pass both parameters to the method
-            }
-        });
-
-        loadModelsButton.setOnAction(e -> loadModelsFromFile(primaryStage));
-
-        // **View Model Details Button Action**
+        
+                // **View Model Details Button Action**
         viewModelDetailsButton.setOnAction(e -> {
             Model selectedModel = modelListView.getSelectionModel().getSelectedItem();
             if (selectedModel != null) {
@@ -101,9 +154,65 @@ public class ModelManagerUI extends Application {
             }
         });
 
+		**/
+       
+        saveItem.setOnAction(e -> {
+            List<Model> modelList = models;  // Convert ObservableList to List
+            if (saveFile != null) {
+            	saveModelsToFile(modelList, saveFile.getAbsolutePath());
+            }
+            else {
+            	handleSaveAs(models, primaryStage);
+            }
+        });
+        
+        saveAsItem.setOnAction(e -> {
+            // Call the reusable "Save As" logic directly
+            handleSaveAs(models, primaryStage);
+        });
+
+        loadItem.setOnAction(e -> loadModelsFromFile(primaryStage));
+        
+        quitItem.setOnAction(e -> {
+            primaryStage.close();
+        });
+        
         // Scene setup
         primaryStage.setScene(new Scene(root, 800, 600));
         primaryStage.show();
+    }
+    
+    private String updateModelDetails(Model model) {
+    	String details = "";
+    	details += "Model ID: " + model.getModelId();
+    	details += "\nFile:     " + model.getFilePath();
+    	details += "\nDependency Params:\n";
+        
+    	// Display Dependency Parameters
+        StringBuilder depParams = new StringBuilder();
+        for (DependancyParameter dep : model.getDependencyParameters()) {
+            depParams.append("\t").append("Param Name:").append(dep.getName()).append("\n");
+        }
+        details += depParams;
+     
+        return details;
+    	
+    }
+    
+    // Method to handle "Save As" functionality
+    private void handleSaveAs(List<Model> models, Stage primaryStage) {
+        // Convert ObservableList to List
+        List<Model> modelList = models;
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JSON Files", "*.json"));
+        File file = fileChooser.showSaveDialog(primaryStage);  // Let user choose file path
+
+        if (file != null) {
+            // Update saveFile so it can be reused for future saves
+            saveFile = file;
+            saveModelsToFile(modelList, file.getAbsolutePath());  // Save the models to the file
+        }
     }
 
     // **New Method to Show Model Details Window**
@@ -151,46 +260,68 @@ public class ModelManagerUI extends Application {
         VBox editorLayout = new VBox(10);
         editorLayout.setPadding(new Insets(10));
 
+        // Create text fields for Model ID and File Path
         TextField idField = new TextField();
         idField.setPromptText("Model ID");
+
         TextField filePathField = new TextField();
         filePathField.setPromptText("File Path");
 
+        // Open file dialog when the editor window is shown
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All Files", "*.*"));
+
+        // If a model is provided, populate the fields
         if (model != null) {
             idField.setText(model.getModelId());
             filePathField.setText(model.getFilePath());
+        } else {
+            // If no model exists (i.e., adding a new model), open a file dialog
+            fileChooser.setTitle("Select Model File");
+            File selectedFile = fileChooser.showOpenDialog(owner);
+            if (selectedFile != null) {
+                // Set the file path and extract the model ID from the file name
+                String filePath = selectedFile.getAbsolutePath();
+                String modelId = selectedFile.getName().replaceFirst("[.][^.]+$", ""); // Remove file extension
+                idField.setText(modelId);
+                filePathField.setText(filePath);
+            }
         }
 
-        Button addDependencyParamButton = new Button("Add DependencyParam");
-        Button addEnvironmentParamButton = new Button("Add EnvironmentParam");
-        Button addInternalParamButton = new Button("Add InternalParam");
-
-        addDependencyParamButton.setOnAction(e -> openDependencyParamEditor(model));
-        addEnvironmentParamButton.setOnAction(e -> openEnvironmentParamEditor(model));
-        addInternalParamButton.setOnAction(e -> openInternalParamEditor(model));
-
+        // Save Button
         Button saveButton = new Button("Save");
         saveButton.setOnAction(e -> {
             String id = idField.getText().trim();
             String filePath = filePathField.getText().trim();
 
+            // Validation: Ensure ID and File Path are not empty
             if (id.isEmpty() || filePath.isEmpty()) {
                 showAlert("Validation Error", "Both ID and file path are required.");
                 return;
             }
 
             if (model == null) {
+                // Create a new model and add it to the list
                 Model newModel = new Model(id, filePath);
                 models.add(newModel);
             } else {
+                // Update the existing model
                 model.setModelId(id);
                 model.setFilePath(filePath);
             }
+
+            // Close the editor window after saving
             editorStage.close();
         });
 
-        editorLayout.getChildren().addAll(new Label("Model ID:"), idField, new Label("File Path:"), filePathField,
-                addDependencyParamButton, addEnvironmentParamButton, addInternalParamButton, saveButton);
+        // Add elements to the layout
+        editorLayout.getChildren().addAll(
+            new Label("Model ID:"), idField,
+            new Label("File Path:"), filePathField,
+            saveButton
+        );
+
+        // Set the layout and display the editor stage
         editorStage.setScene(new Scene(editorLayout));
         editorStage.initOwner(owner);
         editorStage.showAndWait();
@@ -430,7 +561,6 @@ public class ModelManagerUI extends Application {
         }
     }
 
-
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
@@ -443,4 +573,3 @@ public class ModelManagerUI extends Application {
         launch(args);
     }
 }
-

@@ -1,0 +1,1 @@
+1) Right-hand window to display currently selected model details with option to edit 
