@@ -38,4 +38,7 @@ public class EnvironmentParameter {
     public void setCalculation(String newCalculation) {
     	this.calculation = newCalculation;
     }
+    public String toString() {
+    	return getName() + ", " + getFilePath() + ", " + getCalculation();
+    }
 }

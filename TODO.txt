@@ -1,1 +1,5 @@
-1) Right-hand window to display currently selected model details with option to edit 
+2) Create new 'Undefined Param' class which should be populated when models loaded
+3) Imported model should be selected by default
+4) Show full path when importing file. Use (...) if file name longer than max length 
+5) Right window should be made up of multiple list objects with buttons next to each item
+6) Labels for sections with buttons to add params -> from list of undefined params initially

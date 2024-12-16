@@ -9,6 +9,7 @@ public class Model {
     private List<DependancyParameter> dependencyParameters;
     private List<EnvironmentParameter> environmentParameters;
     private List<InternalParameter> internalParameters;
+    private List<UndefinedParameter> undefinedParameters;
 
     public Model(String modelId, String filePath) {
         this.modelId = modelId;
@@ -16,6 +17,7 @@ public class Model {
         this.dependencyParameters = new ArrayList<>();
         this.environmentParameters = new ArrayList<>();
         this.internalParameters = new ArrayList<>();
+        this.undefinedParameters = new ArrayList<>();
     }
 
     // Methods to add parameters
@@ -29,6 +31,10 @@ public class Model {
 
     public void addInternalParameter(String name) {
         internalParameters.add(new InternalParameter(name));
+    }
+    
+    public void addUndefinedParameter(String param) {
+    	undefinedParameters.add(new UndefinedParameter(param));
     }
 
     // Getters for the model ID and file path
@@ -59,6 +65,10 @@ public class Model {
 
     public List<InternalParameter> getInternalParameters() {
         return internalParameters;
+    }
+    
+    public List<UndefinedParameter> getUndefinedParameters() {
+    	return undefinedParameters;
     }
 }
 

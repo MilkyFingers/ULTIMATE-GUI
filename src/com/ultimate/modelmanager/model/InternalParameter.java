@@ -18,4 +18,7 @@ public class InternalParameter {
     public void setName(String newName) {
     	this.name = newName;
     }
+    public String toString() {
+    	return getName();
+    }
 }

@@ -6,78 +6,61 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.stage.Stage;
+
 public class MainWindowUI extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("JavaFX UI Example");
+        // Create a ListView
+        ListView<String> listView = new ListView<>();
+        
+        // Add some items to the list
+        listView.getItems().addAll("Item 1", "Item 2", "Item 3", "Item 4");
 
-        // Create the root layout - BorderPane
-        BorderPane root = new BorderPane();
+        // Set a custom cell factory
+        listView.setCellFactory(param -> new ListCell<>() {
+            private final Label label = new Label();
+            private final Button button = new Button("Action");
+            private final HBox hBox = new HBox(label, button);
 
-        // Left side: Scrollable pane
-        VBox leftSide = new VBox(10);  // You can add any items you want in this VBox
-        leftSide.setStyle("-fx-background-color: lightgray; -fx-padding: 10;");
-        ScrollPane scrollPane = new ScrollPane(leftSide);
-        scrollPane.setFitToHeight(true);  // Make sure it stretches to fill the height of the window
-        scrollPane.setFitToWidth(true);   // Make sure it stretches to fill the width of the window
-        root.setLeft(scrollPane);
+            {
+                // Style the HBox
+                hBox.setSpacing(10);
+                HBox.setHgrow(label, Priority.ALWAYS);
 
-        // Right side: Displaying information
-        VBox rightSide = new VBox(10);
-        rightSide.setStyle("-fx-background-color: white; -fx-padding: 10;");
-        Label infoLabel = new Label("Information will be displayed here");
-        rightSide.getChildren().add(infoLabel);
-        root.setCenter(rightSide);
+                // Add a click handler for the button
+                button.setOnAction(event -> {
+                    String item = getItem();
+                    if (item != null) {
+                        System.out.println("Button clicked for: " + item);
+                    }
+                });
+            }
 
-        // Menu Bar
-        MenuBar menuBar = new MenuBar();
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
 
-        // "File" Menu
-        Menu fileMenu = new Menu("File");
-        MenuItem loadItem = new MenuItem("Load");
-        MenuItem saveItem = new MenuItem("Save");
-        fileMenu.getItems().addAll(loadItem, saveItem);
-
-        // "Edit" Menu
-        Menu editMenu = new Menu("Edit");
-        MenuItem undoItem = new MenuItem("Undo");
-        MenuItem redoItem = new MenuItem("Redo");
-        editMenu.getItems().addAll(undoItem, redoItem);
-
-        // "Quit" Menu
-        Menu quitMenu = new Menu("Quit");
-        MenuItem quitItem = new MenuItem("Quit");
-        quitMenu.getItems().add(quitItem);
-
-        // Add menus to the MenuBar
-        menuBar.getMenus().addAll(fileMenu, editMenu, quitMenu);
-
-        // Set the menu bar at the top of the window
-        root.setTop(menuBar);
-
-        // Action handlers for the menu items
-        loadItem.setOnAction(e -> {
-            System.out.println("Load option selected");
-            // Implement Load functionality here
+                if (empty || item == null) {
+                    setText(null);
+                    setGraphic(null);
+                } else {
+                    label.setText(item); // Set the text for the label
+                    setGraphic(hBox);    // Set the HBox as the graphic
+                }
+            }
         });
 
-        saveItem.setOnAction(e -> {
-            System.out.println("Save option selected");
-            // Implement Save functionality here
-        });
-
-        quitItem.setOnAction(e -> {
-            primaryStage.close();
-        });
-
-        // Create the scene with the root layout
-        Scene scene = new Scene(root, 800, 600);
-
-        // Set the scene on the primaryStage
+        // Set up the scene and stage
+        Scene scene = new Scene(listView, 300, 200);
         primaryStage.setScene(scene);
-
-        // Show the stage
+        primaryStage.setTitle("ListView with Buttons");
         primaryStage.show();
     }
 

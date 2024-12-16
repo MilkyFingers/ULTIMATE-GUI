@@ -38,4 +38,8 @@ public class DependancyParameter {
     public void setDefinition(String newDefinition) {
     	this.definition = newDefinition;
     }
+    
+    public String toString() {
+    	return getName() + ", " + getModelID() + ", " + getDefinition();
+    }
 }
