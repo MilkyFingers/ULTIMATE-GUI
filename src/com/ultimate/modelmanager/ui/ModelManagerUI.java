@@ -26,6 +26,138 @@ import java.util.List;
 import java.util.Set;
 
 public class ModelManagerUI extends Application {
+	
+	// This is the root window. It will contain all the secondary widgets
+	private Stage mainStage;
+	
+	// This will contain the models in the session
+    private final ObservableList<Model> models = FXCollections.observableArrayList();
+	
+	// These IDs will be assigned to widgets -> allows access outside of the startMethod
+    // TODO : Assign all IDs
+	private String menu = "menu";
+	private String selectModel = "selectModelButtons";
+	private String modelsList = "modelsList";
+	private String modelDetails = "modelDetails";
+	private String environmentParamList = "environmentParamList";
+	private String dependencytParamList = "dependencytParamList";
+	private String internalParamList = "internalParamList";
+	private String undefinedParamList = "undefinedParamList";
+	
+	// These strings will contain the title and project name
+	private String title = "ULTIMATE Model Manager: ";
+	private String projectName = "untitled";
+
+	/**
+	 * Inherited from Application - this is where all the layout of the GUI will be defined
+	 */
+	@Override
+	public void start(Stage stage) throws Exception {
+		mainStage = stage;
+		mainStage.setTitle(title + projectName);
+		
+		GridPane root = new GridPane(); // This GridPane will act as the root layer widget -> all other widgets will be placed on this
+		
+		// Creating the menuBar widget
+		MenuBar menuBar = new MenuBar(); // The MenuBar -> placed at the top of the root
+		menuBar.setId(menu); // This ID will be used to access this widget outside of this method
+        Menu fileMenu = new Menu("File"); // 'File' menu
+        MenuItem loadItem = new MenuItem("Load");
+        MenuItem saveItem = new MenuItem("Save");
+        MenuItem saveAsItem = new MenuItem("Save As");
+        MenuItem quitItem = new MenuItem("Quit");
+        fileMenu.getItems().addAll(loadItem, saveItem, saveAsItem, quitItem);
+        menuBar.getMenus().addAll(fileMenu);
+        
+        // This VBox will contain an HBox and a ListView on the left of the root -> displays the list of models
+        VBox projectDetails = new VBox(10);
+        HBox selectModelButtonsBox = new HBox(10);
+        selectModelButtonsBox.setAlignment(Pos.CENTER);
+        Button addModelButton = new Button("+");
+        Button upButton = new Button("↑");
+        Button downButton = new Button("↓");
+        selectModelButtonsBox.getChildren().addAll(addModelButton, upButton, downButton);
+        ListView<Model> modelListView = new ListView<>(models);
+        projectDetails.getChildren().addAll(selectModelButtonsBox, modelListView);
+        projectDetails.setVgrow(modelListView, Priority.ALWAYS);
+        
+        // This VBox will contain the list/labels and buttons for adding/editing parameters of the 3 classes
+        VBox definedParamDetails = new VBox(10);
+        Text modelIDFile = new Text("Model ID:\nFile Path:"); // display the selected modelID and file path
+        
+        VBox environmentParamDetails = new VBox(10); // this will hold the labels/buttons/lists for e params
+        HBox eParamLabelButton = new HBox(10);
+        eParamLabelButton.setAlignment(Pos.CENTER);
+        Label environmentParamLabel = new Label("Environment Parameters");
+        Button addEnvironmentParamButton = new Button("+");
+        eParamLabelButton.getChildren().addAll(environmentParamLabel, addEnvironmentParamButton);
+        ListView<EnvironmentParameter> environmentParamList = new ListView<>();
+        environmentParamDetails.getChildren().addAll(eParamLabelButton, environmentParamList);
+        
+        VBox dependencyParamDetails = new VBox(10); // this will hold the labels/buttons/lists for d params
+        HBox dParamLabelButton = new HBox(10);
+        dParamLabelButton.setAlignment(Pos.CENTER);
+        Label dependencyParamLabel = new Label("Dependency Parameters");
+        Button addDependencyParamButton = new Button("+");
+        dParamLabelButton.getChildren().addAll(dependencyParamLabel, addDependencyParamButton);
+        ListView<DependancyParameter> dependencyParamList = new ListView<>();
+        dependencyParamDetails.getChildren().addAll(dParamLabelButton, dependencyParamList);
+        
+        VBox internalParamDetails = new VBox(10); // this will hold the labels/buttons/lists for d params
+        HBox iParamLabelButton = new HBox(10);
+        iParamLabelButton.setAlignment(Pos.CENTER);
+        Label internalParamLabel = new Label("Internal Parameters");
+        Button addInternalParamButton = new Button("+");
+        iParamLabelButton.getChildren().addAll(internalParamLabel, addInternalParamButton);
+        ListView<InternalParameter> internalParamList = new ListView<>();
+        internalParamDetails.getChildren().addAll(iParamLabelButton, internalParamList);
+        
+        definedParamDetails.getChildren().addAll(modelIDFile, environmentParamDetails, dependencyParamDetails, internalParamDetails);
+        
+        // This will hold the list of undefined parameters
+        VBox undefinedParamDetails = new VBox(10);
+        Label uParamLabel = new Label("Undefined Paramters");
+        uParamLabel.setAlignment(Pos.CENTER);
+        ListView<UndefinedParameter> undefinedParamList = new ListView<>();
+        undefinedParamDetails.getChildren().addAll(uParamLabel, undefinedParamList);
+        undefinedParamDetails.setVgrow(undefinedParamList, Priority.ALWAYS);
+
+        // Adding all the widgets to the root grid
+        root.add(menuBar, 0,0); // Set the menu bar at the top of the window
+        root.add(projectDetails, 0, 1);        
+        root.add(definedParamDetails, 1, 1);
+        root.add(undefinedParamDetails, 2, 1);
+        
+        // Dynamic resizing control for widgets
+        root.setColumnSpan(menuBar, root.REMAINING); // Span menu bar across all columns        
+        // Ensure both VBoxes take up equal space
+        root.setHgrow(projectDetails, Priority.ALWAYS);
+        root.setHgrow(definedParamDetails, Priority.ALWAYS);
+        root.setHgrow(undefinedParamDetails, Priority.ALWAYS);
+        root.setVgrow(projectDetails, Priority.ALWAYS);
+        root.setVgrow(definedParamDetails, Priority.ALWAYS);
+        root.setVgrow(undefinedParamDetails, Priority.ALWAYS);
+
+        // Set margins for VBoxes to create spacing between them and the GridPane edges
+        root.setMargin(projectDetails, new Insets(10));
+        root.setMargin(definedParamDetails, new Insets(10));
+        root.setMargin(undefinedParamDetails, new Insets(10));
+
+
+        // Scene setup
+        mainStage.setScene(new Scene(root, 800, 600));
+        mainStage.show();
+
+	}
+	
+    public static void main(String[] args) {
+        launch(args);
+    }
+	
+}
+
+/**
+public class ModelManagerUI extends Application {
 	// The Stage -> allows changing the title name
 	private Stage mainStage;
 	// This will store the models during the user session
@@ -44,7 +176,6 @@ public class ModelManagerUI extends Application {
 
         // Layouts
         BorderPane root = new BorderPane();
-        
         // Menu Bar
         MenuBar menuBar = new MenuBar();
         // "File" Menu
@@ -58,6 +189,7 @@ public class ModelManagerUI extends Application {
         menuBar.getMenus().addAll(fileMenu);
         // Set the menu bar at the top of the window
         root.setTop(menuBar);
+        
         saveItem.setOnAction(e -> {
             List<Model> modelList = models;  // Convert ObservableList to List
             if (saveFile != null) {
@@ -592,3 +724,4 @@ public class ModelManagerUI extends Application {
         launch(args);
     }
 }
+**/
