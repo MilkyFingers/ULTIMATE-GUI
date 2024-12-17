@@ -98,6 +98,7 @@ public class ModelManagerUI extends Application {
         HBox eParamLabelButton = new HBox(10);
         eParamLabelButton.setAlignment(Pos.CENTER);
         Label environmentParamLabel = new Label("Environment Parameters");
+        // TODO: implement button to access a drop-down listing the undefined params
         Button addEnvironmentParamButton = new Button("+");
         eParamLabelButton.getChildren().addAll(environmentParamLabel, addEnvironmentParamButton);
         ListView<EnvironmentParameter> environmentParamList = new ListView<>();
@@ -108,6 +109,7 @@ public class ModelManagerUI extends Application {
         HBox dParamLabelButton = new HBox(10);
         dParamLabelButton.setAlignment(Pos.CENTER);
         Label dependencyParamLabel = new Label("Dependency Parameters");
+        // TODO: implement button to access a drop-down listing the undefined params
         Button addDependencyParamButton = new Button("+");
         dParamLabelButton.getChildren().addAll(dependencyParamLabel, addDependencyParamButton);
         ListView<DependancyParameter> dependencyParamList = new ListView<>();
@@ -118,6 +120,7 @@ public class ModelManagerUI extends Application {
         HBox iParamLabelButton = new HBox(10);
         iParamLabelButton.setAlignment(Pos.CENTER);
         Label internalParamLabel = new Label("Internal Parameters");
+        // TODO: implement button to access a drop-down listing the undefined params
         Button addInternalParamButton = new Button("+");
         iParamLabelButton.getChildren().addAll(internalParamLabel, addInternalParamButton);
         ListView<InternalParameter> internalParamList = new ListView<>();
@@ -127,6 +130,7 @@ public class ModelManagerUI extends Application {
         definedParamDetails.getChildren().addAll(modelIDFile, environmentParamDetails, dependencyParamDetails, internalParamDetails);
         
         // This will hold the list of undefined parameters
+        // TODO: make this dynamically appear/disappear based on whether list empty or not
         VBox undefinedParamDetails = new VBox(10);
         Label uParamLabel = new Label("Undefined Paramters");
         uParamLabel.setAlignment(Pos.CENTER);
@@ -180,7 +184,7 @@ public class ModelManagerUI extends Application {
             mainStage.close();
         });
         
-        // PROJECT DETAILS LIST DEFINITIONS
+        // PROJECT DETAILS LIST DEFINITIONS TODO: add keyboard shortcut to delete
         // ListView to display models
         modelListView.setCellFactory(param -> new ListCell<>() {
             @Override
@@ -217,11 +221,174 @@ public class ModelManagerUI extends Application {
                 modelListView.getSelectionModel().select(selectedIndex + 1);
             }
         });
+        
+        // TODO: implement the edit and - buttons. Add keyboard shortcut to delete
+        // CELL FACTORIES FOR THE DEFINED PARAMETER LISTS
+        environmentParamList.setCellFactory(param -> new ListCell<>() {
+            @Override
+            protected void updateItem(EnvironmentParameter item, boolean empty) {
+                super.updateItem(item, empty);
 
+                if (empty || item == null) {
+                    setGraphic(null);
+                    setText(null);
+                } else {
+                    // Parse the item into f1, f2, and f3
+                    String[] fields = item.toString().split(",");
+                    String f1 = fields.length > 0 ? fields[0] : "";
+                    String f2 = fields.length > 1 ? fields[1] : "";
+                    String f3 = fields.length > 2 ? fields[2] : "";
+
+                    // Create a VBox for the layout
+                    VBox vbox = new VBox(5); // 5px spacing between elements
+
+                    // Create HBox for f1 with buttons
+                    HBox f1Box = new HBox(10); // 10px spacing between elements
+                    Label f1Label = new Label(f1);
+                    f1Label.setStyle("-fx-font-weight: bold;"); // Make f1 bold
+                    Button minusButton = new Button("-");
+                    Button editButton = new Button("Edit");
+                    f1Box.getChildren().addAll(f1Label, minusButton, editButton);
+
+                    // Add event handlers for the buttons
+                    minusButton.setOnAction(e -> {
+                        // Handle remove functionality
+                        //getListView().getItems().remove(item);
+                    });
+
+                    editButton.setOnAction(e -> {
+                        // Handle edit functionality (e.g., open an editor dialog)
+                        //editEnvironmentParameter(item);
+                    });
+
+                    // Create a VBox for f2 and f3 with indentation and bullets
+                    VBox subParamsBox = new VBox(5);
+                    subParamsBox.setPadding(new Insets(0, 0, 0, 20)); // Indent the sub-parameters
+                    Label f2Label = new Label("• " + f2);
+                    Label f3Label = new Label("• " + f3);
+                    subParamsBox.getChildren().addAll(f2Label, f3Label);
+
+                    // Add all elements to the main VBox
+                    vbox.getChildren().addAll(f1Box, subParamsBox);
+
+                    // Set the VBox as the cell's graphic
+                    setGraphic(vbox);
+                    setText(null);
+                }
+            }
+        });
+
+        dependencyParamList.setCellFactory(param -> new ListCell<>() {
+            @Override
+            protected void updateItem(DependancyParameter item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if (empty || item == null) {
+                    setGraphic(null);
+                    setText(null);
+                } else {
+                    // Parse the item into f1, f2, and f3
+                    String[] fields = item.toString().split(",");
+                    String f1 = fields.length > 0 ? fields[0] : "";
+                    String f2 = fields.length > 1 ? fields[1] : "";
+                    String f3 = fields.length > 2 ? fields[2] : "";
+
+                    // Create a VBox for the layout
+                    VBox vbox = new VBox(5); // 5px spacing between elements
+
+                    // Create HBox for f1 with buttons
+                    HBox f1Box = new HBox(10); // 10px spacing between elements
+                    Label f1Label = new Label(f1);
+                    f1Label.setStyle("-fx-font-weight: bold;"); // Make f1 bold
+                    Button minusButton = new Button("-");
+                    Button editButton = new Button("Edit");
+                    f1Box.getChildren().addAll(f1Label, minusButton, editButton);
+
+                    // Add event handlers for the buttons
+                    minusButton.setOnAction(e -> {
+                        // Handle remove functionality
+                        //getListView().getItems().remove(item);
+                    });
+
+                    editButton.setOnAction(e -> {
+                        // Handle edit functionality (e.g., open an editor dialog)
+                        //editEnvironmentParameter(item);
+                    });
+
+                    // Create a VBox for f2 and f3 with indentation and bullets
+                    VBox subParamsBox = new VBox(5);
+                    subParamsBox.setPadding(new Insets(0, 0, 0, 20)); // Indent the sub-parameters
+                    Label f2Label = new Label("• " + f2);
+                    Label f3Label = new Label("• " + f3);
+                    subParamsBox.getChildren().addAll(f2Label, f3Label);
+
+                    // Add all elements to the main VBox
+                    vbox.getChildren().addAll(f1Box, subParamsBox);
+
+                    // Set the VBox as the cell's graphic
+                    setGraphic(vbox);
+                    setText(null);
+                }
+            }
+        });
+        
+        internalParamList.setCellFactory(param -> new ListCell<>() {
+            @Override
+            protected void updateItem(InternalParameter item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if (empty || item == null) {
+                    setGraphic(null);
+                    setText(null);
+                } else {
+                    // Parse the item into f1, f2, and f3
+                    String[] fields = item.toString().split(",");
+                    String f1 = fields.length > 0 ? fields[0] : "";
+                    String f2 = fields.length > 1 ? fields[1] : "";
+                    String f3 = fields.length > 2 ? fields[2] : "";
+
+                    // Create a VBox for the layout
+                    VBox vbox = new VBox(5); // 5px spacing between elements
+
+                    // Create HBox for f1 with buttons
+                    HBox f1Box = new HBox(10); // 10px spacing between elements
+                    Label f1Label = new Label(f1);
+                    f1Label.setStyle("-fx-font-weight: bold;"); // Make f1 bold
+                    Button minusButton = new Button("-");
+                    Button editButton = new Button("Edit");
+                    f1Box.getChildren().addAll(f1Label, minusButton, editButton);
+
+                    // Add event handlers for the buttons
+                    minusButton.setOnAction(e -> {
+                        // Handle remove functionality
+                        //getListView().getItems().remove(item);
+                    });
+
+                    editButton.setOnAction(e -> {
+                        // Handle edit functionality (e.g., open an editor dialog)
+                        //editEnvironmentParameter(item);
+                    });
+
+                    // Create a VBox for f2 and f3 with indentation and bullets
+                    VBox subParamsBox = new VBox(5);
+                    subParamsBox.setPadding(new Insets(0, 0, 0, 20)); // Indent the sub-parameters
+                    Label f2Label = new Label("• " + f2);
+                    Label f3Label = new Label("• " + f3);
+                    subParamsBox.getChildren().addAll(f2Label, f3Label);
+
+                    // Add all elements to the main VBox
+                    vbox.getChildren().addAll(f1Box, subParamsBox);
+
+                    // Set the VBox as the cell's graphic
+                    setGraphic(vbox);
+                    setText(null);
+                }
+            }
+        });
+        
         // Scene setup
         mainStage.setScene(new Scene(root, 800, 600));
         mainStage.show();
-
 	}
 	
     public static void main(String[] args) {
