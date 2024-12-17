@@ -32,24 +32,33 @@ public class ModelManagerUI extends Application {
 	
 	// This will contain the models in the session
     private final ObservableList<Model> models = FXCollections.observableArrayList();
+    
+    // Used for the save function
+    File saveFile = null;
 	
 	// These IDs will be assigned to widgets -> allows access outside of the startMethod
-    // TODO : Assign all IDs
-	private String menu = "menu";
-	private String selectModel = "selectModelButtons";
-	private String modelsList = "modelsList";
 	private String modelDetails = "modelDetails";
-	private String environmentParamList = "environmentParamList";
-	private String dependencytParamList = "dependencytParamList";
-	private String internalParamList = "internalParamList";
-	private String undefinedParamList = "undefinedParamList";
+	private String eParamList = "eParamList";
+	private String dParamList = "dParamList";
+	private String iParamList = "iParamList";
+	private String uParamList = "uParamList";
 	
 	// These strings will contain the title and project name
 	private String title = "ULTIMATE Model Manager: ";
 	private String projectName = "untitled";
 
 	/**
-	 * Inherited from Application - this is where all the layout of the GUI will be defined
+	 * Inherited from Application - this is where all the layout of the GUI will be defined.
+	 * 		1) The main widget is the GridPane 'root' -> all widgets are placed on this grid
+	 * 		2) The MenuBar spans the top of the grid
+	 * 		3) There are three additional VBox's:
+	 * 			'projectDetails' contains the models of the project loaded/user created models
+	 * 			'definedParamDetails' contains a number of smaller VBox's that each display a list of defined parameter
+	 * 			'undefinedParamDetails' contains the list of undefined parameters which are classified
+	 * 		4) These are defined in order
+	 * 		5) The widgets are placed onto the root and given resizing priorities and margins 
+	 * 		6) Some widgets are given an ID (defined above) so they can be accessed easily outside the scope of the 'start' method
+	 * 		7) The functionality of buttons/listeners are defined at the end of the 'start' method
 	 */
 	@Override
 	public void start(Stage stage) throws Exception {
@@ -60,7 +69,6 @@ public class ModelManagerUI extends Application {
 		
 		// Creating the menuBar widget
 		MenuBar menuBar = new MenuBar(); // The MenuBar -> placed at the top of the root
-		menuBar.setId(menu); // This ID will be used to access this widget outside of this method
         Menu fileMenu = new Menu("File"); // 'File' menu
         MenuItem loadItem = new MenuItem("Load");
         MenuItem saveItem = new MenuItem("Save");
@@ -84,6 +92,7 @@ public class ModelManagerUI extends Application {
         // This VBox will contain the list/labels and buttons for adding/editing parameters of the 3 classes
         VBox definedParamDetails = new VBox(10);
         Text modelIDFile = new Text("Model ID:\nFile Path:"); // display the selected modelID and file path
+        modelIDFile.setId(modelDetails);
         
         VBox environmentParamDetails = new VBox(10); // this will hold the labels/buttons/lists for e params
         HBox eParamLabelButton = new HBox(10);
@@ -92,6 +101,7 @@ public class ModelManagerUI extends Application {
         Button addEnvironmentParamButton = new Button("+");
         eParamLabelButton.getChildren().addAll(environmentParamLabel, addEnvironmentParamButton);
         ListView<EnvironmentParameter> environmentParamList = new ListView<>();
+        environmentParamList.setId(eParamList);
         environmentParamDetails.getChildren().addAll(eParamLabelButton, environmentParamList);
         
         VBox dependencyParamDetails = new VBox(10); // this will hold the labels/buttons/lists for d params
@@ -101,6 +111,7 @@ public class ModelManagerUI extends Application {
         Button addDependencyParamButton = new Button("+");
         dParamLabelButton.getChildren().addAll(dependencyParamLabel, addDependencyParamButton);
         ListView<DependancyParameter> dependencyParamList = new ListView<>();
+        dependencyParamList.setId(dParamList);
         dependencyParamDetails.getChildren().addAll(dParamLabelButton, dependencyParamList);
         
         VBox internalParamDetails = new VBox(10); // this will hold the labels/buttons/lists for d params
@@ -110,6 +121,7 @@ public class ModelManagerUI extends Application {
         Button addInternalParamButton = new Button("+");
         iParamLabelButton.getChildren().addAll(internalParamLabel, addInternalParamButton);
         ListView<InternalParameter> internalParamList = new ListView<>();
+        internalParamList.setId(iParamList);
         internalParamDetails.getChildren().addAll(iParamLabelButton, internalParamList);
         
         definedParamDetails.getChildren().addAll(modelIDFile, environmentParamDetails, dependencyParamDetails, internalParamDetails);
@@ -119,6 +131,7 @@ public class ModelManagerUI extends Application {
         Label uParamLabel = new Label("Undefined Paramters");
         uParamLabel.setAlignment(Pos.CENTER);
         ListView<UndefinedParameter> undefinedParamList = new ListView<>();
+        undefinedParamList.setId(uParamList);
         undefinedParamDetails.getChildren().addAll(uParamLabel, undefinedParamList);
         undefinedParamDetails.setVgrow(undefinedParamList, Priority.ALWAYS);
 
@@ -142,54 +155,10 @@ public class ModelManagerUI extends Application {
         root.setMargin(projectDetails, new Insets(10));
         root.setMargin(definedParamDetails, new Insets(10));
         root.setMargin(undefinedParamDetails, new Insets(10));
-
-
-        // Scene setup
-        mainStage.setScene(new Scene(root, 800, 600));
-        mainStage.show();
-
-	}
-	
-    public static void main(String[] args) {
-        launch(args);
-    }
-	
-}
-
-/**
-public class ModelManagerUI extends Application {
-	// The Stage -> allows changing the title name
-	private Stage mainStage;
-	// This will store the models during the user session
-    private final ObservableList<Model> models = FXCollections.observableArrayList();
-    // Used for the save function
-    File saveFile = null;
-    // used when a project is loaded into the editor 
-    String projectName = "untitled";
-    // Parses files and returns the list of params
-    PrismFileParser parser = new PrismFileParser();
-
-    @Override
-    public void start(Stage stage) {
-    	mainStage = stage;
-        mainStage.setTitle("ULTIMATE Model Manager: " + projectName);
-
-        // Layouts
-        BorderPane root = new BorderPane();
-        // Menu Bar
-        MenuBar menuBar = new MenuBar();
-        // "File" Menu
-        Menu fileMenu = new Menu("File");
-        MenuItem loadItem = new MenuItem("Load");
-        MenuItem saveItem = new MenuItem("Save");
-        MenuItem saveAsItem = new MenuItem("Save As");
-        MenuItem quitItem = new MenuItem("Quit");
-        fileMenu.getItems().addAll(loadItem, saveItem, saveAsItem, quitItem);
-        // Add menus to the MenuBar
-        menuBar.getMenus().addAll(fileMenu);
-        // Set the menu bar at the top of the window
-        root.setTop(menuBar);
         
+        // DEFINING BUTTONS AND ACTIONS
+        
+        // MENU DEFINITIONS
         saveItem.setOnAction(e -> {
             List<Model> modelList = models;  // Convert ObservableList to List
             if (saveFile != null) {
@@ -211,48 +180,8 @@ public class ModelManagerUI extends Application {
             mainStage.close();
         });
         
-        GridPane modelDetails = new GridPane();
-        modelDetails.setStyle("-fx-border-width: 2px; -fx-padding: 5px;");
-        // This textbox will hold the modelID and filePath
-        Text modelIDFile = new Text("\nModelID:\n\nFile Path:\n");
-        modelIDFile.setId("modelIDFile"); // assign an id to update this widget later
-        modelDetails.add(modelIDFile, 0, 0, 2, 1);
-        // Environmental param label
-        Label environmentParamLabel = new Label("Environment Parameters:\t");
-        modelDetails.add(environmentParamLabel, 0, 1, 1, 1);
-        Button addEnvironmentParam = new Button("+");
-        modelDetails.add(addEnvironmentParam, 1, 1, 1, 1);
-        ListView<EnvironmentParameter> environmentParamList = new ListView<>();
-        environmentParamList.setId("environmentParamList");  // Ensure this ID is set
-        modelDetails.add(environmentParamList, 0, 2, 2, 1);
-        Label dependancyParamLabel = new Label("Dependency Parameters:\t");
-        modelDetails.add(dependancyParamLabel, 0, 3, 1, 1);
-        Button addDependencyParam = new Button("+");
-        modelDetails.add(addDependencyParam, 1, 3, 1, 1);
-        ListView<DependancyParameter> dependancyParamList = new ListView<>();
-        dependancyParamList.setId("dependancyParamList");
-        modelDetails.add(dependancyParamList, 0, 4, 2, 1);
-        Label internalParamLabel = new Label("Internal Parameters:\t");
-        modelDetails.add(internalParamLabel, 0, 5, 1, 1);
-        Button addInternalParam = new Button("+");
-        modelDetails.add(addInternalParam, 1, 5, 1, 1);
-        ListView<InternalParameter> internalParamList = new ListView<>();
-        internalParamList.setId("internalParamList");
-        modelDetails.add(internalParamList, 0, 6, 2, 1);
-        root.setCenter(modelDetails);
-        
-        // This will list all the undefinedParams
-        VBox undefinedParams = new VBox();
-        undefinedParams.setStyle("-fx-border-width: 2px; -fx-padding: 5px;");
-        Label undefinedParamsLabel = new Label("Undefined Parameters:");
-        ListView<UndefinedParameter> undefinedParamList = new ListView<>();
-        undefinedParamList.setId("undefinedParamList");
-        undefinedParams.getChildren().addAll(undefinedParamsLabel, undefinedParamList);
-        VBox.setVgrow(undefinedParamList, Priority.ALWAYS);
-        root.setRight(undefinedParams);
-
+        // PROJECT DETAILS LIST DEFINITIONS
         // ListView to display models
-        ListView<Model> modelListView = new ListView<>(models);
         modelListView.setCellFactory(param -> new ListCell<>() {
             @Override
             protected void updateItem(Model item, boolean empty) {
@@ -268,30 +197,8 @@ public class ModelManagerUI extends Application {
             }
         });
         
-        // Buttons
-        Button addModelButton = new Button("+");
-        Button upButton = new Button("↑");
-        Button downButton = new Button("↓");
-        // VBox for buttons and list view
-        VBox vbox = new VBox(10); // 10-pixel spacing between elements
-        vbox.setStyle("-fx-border-width: 2px; -fx-padding: 5px;");
-        // Create an HBox for the buttons (arrange horizontally)
-        HBox hbox = new HBox(10); // 10-pixel spacing between buttons
-        // Centre the buttons horizontally
-        hbox.setAlignment(Pos.CENTER);
-        // Apply a border to the HBox
-        hbox.setStyle("-fx-border-width: 2px; -fx-padding: 5px;");
-        // Add buttons to the HBox
-        hbox.getChildren().addAll(addModelButton, upButton, downButton);
-        // Add the HBox for buttons and the ListView to the VBox
-        vbox.getChildren().addAll(hbox, modelListView);
-        // Ensure the ListView fills the remaining vertical space in the VBox
-        VBox.setVgrow(modelListView, Priority.ALWAYS);
-        // Set the VBox to the left side of the BorderPane
-        root.setLeft(vbox);
-
         // Add event handlers for the buttons
-        addModelButton.setOnAction(e -> openModelEditor(mainStage, null));
+        addModelButton.setOnAction(e -> newModel(mainStage));
 
         upButton.setOnAction(e -> {
             // Handle the "Up" button action
@@ -310,40 +217,17 @@ public class ModelManagerUI extends Application {
                 modelListView.getSelectionModel().select(selectedIndex + 1);
             }
         });
-     
+
         // Scene setup
         mainStage.setScene(new Scene(root, 800, 600));
         mainStage.show();
+
+	}
+	
+    public static void main(String[] args) {
+        launch(args);
     }
     
-    // Here, known dependencies will be displayed as well as unknown
-    private void updateModelDetails(Model model) {
-        // Update the model ID and file path in the Text component
-        Text modelIDFile = (Text) mainStage.getScene().lookup("#modelIDFile");
-        modelIDFile.setText("ModelID: " + model.getModelId() + "\nFile Path: " + model.getFilePath());
-
-        // Update the environment parameters list
-        ListView<EnvironmentParameter> environmentParamList = (ListView<EnvironmentParameter>) mainStage.getScene().lookup("#environmentParamList");
-        environmentParamList.getItems().clear(); // Clear existing items
-        environmentParamList.getItems().addAll(model.getEnvironmentParameters()); // Add new items from the model
-
-        // Update the dependency parameters list
-        ListView<DependancyParameter> dependancyParamList = (ListView<DependancyParameter>) mainStage.getScene().lookup("#dependancyParamList");
-        dependancyParamList.getItems().clear(); // Clear existing items
-        dependancyParamList.getItems().addAll(model.getDependencyParameters()); // Add new items from the model
-
-        // Update the internal parameters list
-        ListView<InternalParameter> internalParamList = (ListView<InternalParameter>) mainStage.getScene().lookup("#internalParamList");
-        internalParamList.getItems().clear(); // Clear existing items
-        internalParamList.getItems().addAll(model.getInternalParameters()); // Add new items from the model
-
-        // Update the undefined parameters list
-        ListView<UndefinedParameter> undefinedParamList = (ListView<UndefinedParameter>) mainStage.getScene().lookup("#undefinedParamList");
-        undefinedParamList.getItems().clear(); // Clear existing items
-        undefinedParamList.getItems().addAll(model.getUndefinedParameters()); // Add new items from the model
-
-    }
-  
     // Method to handle "Save As" functionality
     private void handleSaveAs(List<Model> models, Stage mainStage) {
         // Convert ObservableList to List
@@ -359,11 +243,228 @@ public class ModelManagerUI extends Application {
             saveModelsToFile(modelList, file.getAbsolutePath());  // Save the models to the file
         }
     }
+    
+    public void saveModelsToFile(List<Model> models, String filePath) {
+        JSONObject root = new JSONObject();
+        JSONObject modelsObject = new JSONObject();
 
-    private void openModelEditor(Stage owner, Model model) {
+        for (Model model : models) {
+            JSONObject modelObject = new JSONObject();
+            modelObject.put("id", model.getModelId());
+            modelObject.put("fileName", model.getFilePath());
+
+            // Parameters object
+            JSONObject parametersObject = new JSONObject();
+
+            // Handling dependency parameters
+            JSONObject dependencyObject = new JSONObject();
+            for (DependancyParameter dep : model.getDependencyParameters()) {
+                JSONObject depObj = new JSONObject();
+                depObj.put("name", dep.getName());
+                depObj.put("modelId", dep.getModelID());
+                depObj.put("property", dep.getDefinition());
+                dependencyObject.put(dep.getName(), depObj);  // Add dependency parameters to the object
+            }
+            parametersObject.put("dependency", dependencyObject);
+
+            // Handling environment parameters
+            JSONObject environmentObject = new JSONObject();
+            for (EnvironmentParameter env : model.getEnvironmentParameters()) {
+                JSONObject envObj = new JSONObject();
+                envObj.put("name", env.getName());
+                envObj.put("type", env.getCalculation());
+                envObj.put("dataFile", env.getFilePath());
+                environmentObject.put(env.getName(), envObj);  // Add environment parameters
+            }
+            parametersObject.put("environment", environmentObject);
+
+            // Handling internal parameters (only name should be included)
+            JSONObject internalObject = new JSONObject();
+            for (InternalParameter internal : model.getInternalParameters()) {
+                JSONObject internalObj = new JSONObject();
+                internalObj.put("name", internal.getName());  // Only name for internal parameters
+                internalObject.put(internal.getName(), internalObj);  // Add internal parameters
+            }
+            parametersObject.put("internal", internalObject);
+
+            // Add the parameters to the model object
+            modelObject.put("parameters", parametersObject);
+
+            // Add model to the modelsObject
+            modelsObject.put(model.getModelId(), modelObject);
+        }
+
+        // Wrap everything under "models"
+        root.put("models", modelsObject);
+
+        // Save the JSON to file
+        try (FileWriter file = new FileWriter(filePath)) {
+            file.write(root.toString(4));  // Pretty print with indentation
+            file.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private void loadModelsFromFile(Stage owner) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Load Models");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JSON Files", "*.json"));
+        File file = fileChooser.showOpenDialog(owner);
+
+        if (file != null) {
+            try {
+                // Update title
+                projectName = file.getName().replaceAll(".json", "");
+                setStageTitle(projectName);
+                String content = new String(Files.readAllBytes(Paths.get(file.toURI())));
+                JSONObject root = new JSONObject(content);
+
+                models.clear();
+
+                // Get the 'models' object (it's a JSONObject, not a JSONArray)
+                JSONObject modelsObject = root.getJSONObject("models");
+
+                // Create a parser instance
+                PrismFileParser parser = new PrismFileParser();
+
+                // Iterate over each model in the models object
+                modelsObject.keySet().forEach(modelId -> {
+                    JSONObject modelJson = modelsObject.getJSONObject(modelId);
+                    String id = modelJson.getString("id");
+                    String filePath = modelJson.getString("fileName");
+
+                    // Create a new Model object
+                    Model model = new Model(id, filePath);
+
+                    // Deserialize parameters if needed
+                    JSONObject parametersObject = modelJson.getJSONObject("parameters");
+
+                    // Deserialize dependency parameters
+                    JSONObject dependencyObject = parametersObject.optJSONObject("dependency");
+                    Set<String> dependencyNames = new HashSet<>();
+                    if (dependencyObject != null) {
+                        dependencyObject.keySet().forEach(depName -> {
+                            JSONObject depObj = dependencyObject.getJSONObject(depName);
+                            String depId = depObj.getString("modelId");
+                            String depDefinition = depObj.getString("property");
+                            model.addDependencyParameter(depName, depId, depDefinition);
+                            dependencyNames.add(depName);  // Track names in the dependency category
+                        });
+                    }
+
+                    // Deserialize environment parameters
+                    JSONObject environmentObject = parametersObject.optJSONObject("environment");
+                    Set<String> environmentNames = new HashSet<>();
+                    if (environmentObject != null) {
+                        environmentObject.keySet().forEach(envName -> {
+                            JSONObject envObj = environmentObject.getJSONObject(envName);
+                            String filePathEnv = envObj.getString("dataFile");
+                            String calculation = envObj.getString("type");
+                            model.addEnvironmentParameter(envName, filePathEnv, calculation);
+                            environmentNames.add(envName);  // Track names in the environment category
+                        });
+                    }
+
+                    // Deserialize internal parameters
+                    JSONObject internalObject = parametersObject.optJSONObject("internal");
+                    Set<String> internalNames = new HashSet<>();
+                    if (internalObject != null) {
+                        internalObject.keySet().forEach(internalName -> {
+                            model.addInternalParameter(internalName);
+                            internalNames.add(internalName);  // Track names in the internal category
+                        });
+                    }
+
+                    // Parse the model's file with PrismFileParser
+                    List<String> parsedParams = null;
+					try {
+						parsedParams = parser.parseFile(filePath);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+
+                    // Check each parsed parameter
+                    for (String parsedParam : parsedParams) {
+                        // Extract the parameter name (after the "const <type>" part)
+                        String[] parts = parsedParam.split("\\s+");
+                        if (parts.length == 3) {
+                            String paramName = parts[2];  // This is the <name> part
+
+                            // Check if the name exists in any of the categories
+                            if (!dependencyNames.contains(paramName) &&
+                                !environmentNames.contains(paramName) &&
+                                !internalNames.contains(paramName)) {
+
+                                // Create a new UndefinedParameter and add it to the model
+                                UndefinedParameter up = new UndefinedParameter(paramName);
+                                model.addUndefinedParameter(up.getParameter());
+                            }
+                        }
+                    }
+
+                    // Add the constructed model to the list
+                    models.add(model);
+                });
+            } catch (IOException e) {
+                showAlert("Error", "Failed to load models: " + e.getMessage());
+            }
+        }
+    }
+    
+    public void setStageTitle(String newTitle) {
+    	mainStage.setTitle(title + newTitle);
+    }
+    
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+	
+    // Here, known dependencies will be displayed as well as unknown
+    private void updateModelDetails(Model model) {
+        // Update the model ID and file path in the Text component
+        Text modelIDFile = (Text) mainStage.getScene().lookup("#"+modelDetails); // Remove '#' from the ID
+        if (modelIDFile != null) {
+            modelIDFile.setText("ModelID: " + model.getModelId() + "\nFile Path: " + model.getFilePath());
+        }
+
+        // Update the environment parameters list
+        ListView<EnvironmentParameter> environmentParamList = (ListView<EnvironmentParameter>) mainStage.getScene().lookup("#"+eParamList); 
+        if (environmentParamList != null) {
+            environmentParamList.getItems().clear(); // Clear existing items
+            environmentParamList.getItems().addAll(model.getEnvironmentParameters()); // Add new items from the model
+        }
+
+        // Update the dependency parameters list
+        ListView<DependancyParameter> dependancyParamList = (ListView<DependancyParameter>) mainStage.getScene().lookup("#"+dParamList); 
+        if (dependancyParamList != null) {
+            dependancyParamList.getItems().clear(); // Clear existing items
+            dependancyParamList.getItems().addAll(model.getDependencyParameters()); // Add new items from the model
+        }
+
+        // Update the internal parameters list
+        ListView<InternalParameter> internalParamList = (ListView<InternalParameter>) mainStage.getScene().lookup("#"+iParamList); 
+        if (internalParamList != null) {
+            internalParamList.getItems().clear(); // Clear existing items
+            internalParamList.getItems().addAll(model.getInternalParameters()); // Add new items from the model
+        }
+
+        // Update the undefined parameters list
+        ListView<UndefinedParameter> undefinedParamList = (ListView<UndefinedParameter>) mainStage.getScene().lookup("#"+uParamList); 
+        if (undefinedParamList != null) {
+            undefinedParamList.getItems().clear(); // Clear existing items
+            undefinedParamList.getItems().addAll(model.getUndefinedParameters()); // Add new items from the model
+        }
+    }
+    
+    private void newModel(Stage owner) {
         Stage editorStage = new Stage();
-        editorStage.setTitle(model == null ? "Add New Model" : "Edit Model");
-
+        editorStage.setTitle("Add New Model"); // Always adding a new model
+        
         VBox editorLayout = new VBox(10);
         editorLayout.setPadding(new Insets(10));
 
@@ -378,21 +479,15 @@ public class ModelManagerUI extends Application {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All Files", "*.*"));
 
-        // If a model is provided, populate the fields
-        if (model != null) {
-            idField.setText(model.getModelId());
-            filePathField.setText(model.getFilePath());
-        } else {
-            // If no model exists (i.e., adding a new model), open a file dialog
-            fileChooser.setTitle("Select Model File");
-            File selectedFile = fileChooser.showOpenDialog(owner);
-            if (selectedFile != null) {
-                // Set the file path and extract the model ID from the file name
-                String filePath = selectedFile.getAbsolutePath();
-                String modelId = selectedFile.getName().replaceFirst("[.][^.]+$", ""); // Remove file extension
-                idField.setText(modelId);
-                filePathField.setText(filePath);
-            }
+        // Open a file dialog to select a file and populate fields
+        fileChooser.setTitle("Select Model File");
+        File selectedFile = fileChooser.showOpenDialog(owner);
+        if (selectedFile != null) {
+            // Set the file path and extract the model ID from the file name
+            String filePath = selectedFile.getAbsolutePath();
+            String modelId = selectedFile.getName().replaceFirst("[.][^.]+$", ""); // Remove file extension
+            idField.setText(modelId);
+            filePathField.setText(filePath);
         }
 
         // Save Button
@@ -407,14 +502,33 @@ public class ModelManagerUI extends Application {
                 return;
             }
 
-            if (model == null) {
-                // Create a new model and add it to the list
-                Model newModel = new Model(id, filePath);
-                models.add(newModel);
-            } else {
-                // Update the existing model
-                model.setModelId(id);
-                model.setFilePath(filePath);
+            // Create a new model and add it to the list
+            Model newModel = new Model(id, filePath);
+            models.add(newModel); // Add the newly created model to the model list
+            
+            // Create a parser instance
+            PrismFileParser parser = new PrismFileParser();
+            // Parse the model's file with PrismFileParser
+            List<String> undefinedParams = null;
+            try {
+                undefinedParams = parser.parseFile(filePath);
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+            
+            // Check each parsed parameter and add to the model
+            if (undefinedParams != null) {
+                for (String param : undefinedParams) {
+                    // Extract the parameter name (after the "const <type>" part)
+                    String[] parts = param.split("\\s+");
+                    if (parts.length == 3) {
+                        String paramName = parts[2];  // This is the <name> part
+
+                        // Create a new UndefinedParameter and add it to the model
+                        UndefinedParameter up = new UndefinedParameter(paramName);
+                        newModel.addUndefinedParameter(up.getParameter());
+                    }
+                }
             }
 
             // Close the editor window after saving
@@ -433,7 +547,7 @@ public class ModelManagerUI extends Application {
         editorStage.initOwner(owner);
         editorStage.showAndWait();
     }
-
+/**
     private void openDependencyParamEditor(Model model) {
         if (model == null) {
             showAlert("Error", "Model must be created before adding parameters.");
@@ -538,190 +652,5 @@ public class ModelManagerUI extends Application {
         paramStage.setScene(new Scene(layout));
         paramStage.showAndWait();
     }
-
-    public void saveModelsToFile(List<Model> models, String filePath) {
-        JSONObject root = new JSONObject();
-        JSONObject modelsObject = new JSONObject();
-
-        for (Model model : models) {
-            JSONObject modelObject = new JSONObject();
-            modelObject.put("id", model.getModelId());
-            modelObject.put("fileName", model.getFilePath());
-
-            // Parameters object
-            JSONObject parametersObject = new JSONObject();
-
-            // Handling dependency parameters
-            JSONObject dependencyObject = new JSONObject();
-            for (DependancyParameter dep : model.getDependencyParameters()) {
-                JSONObject depObj = new JSONObject();
-                depObj.put("name", dep.getName());
-                depObj.put("modelId", dep.getModelID());
-                depObj.put("property", dep.getDefinition());
-                dependencyObject.put(dep.getName(), depObj);  // Add dependency parameters to the object
-            }
-            parametersObject.put("dependency", dependencyObject);
-
-            // Handling environment parameters
-            JSONObject environmentObject = new JSONObject();
-            for (EnvironmentParameter env : model.getEnvironmentParameters()) {
-                JSONObject envObj = new JSONObject();
-                envObj.put("name", env.getName());
-                envObj.put("type", env.getCalculation());
-                envObj.put("dataFile", env.getFilePath());
-                environmentObject.put(env.getName(), envObj);  // Add environment parameters
-            }
-            parametersObject.put("environment", environmentObject);
-
-            // Handling internal parameters (only name should be included)
-            JSONObject internalObject = new JSONObject();
-            for (InternalParameter internal : model.getInternalParameters()) {
-                JSONObject internalObj = new JSONObject();
-                internalObj.put("name", internal.getName());  // Only name for internal parameters
-                internalObject.put(internal.getName(), internalObj);  // Add internal parameters
-            }
-            parametersObject.put("internal", internalObject);
-
-            // Add the parameters to the model object
-            modelObject.put("parameters", parametersObject);
-
-            // Add model to the modelsObject
-            modelsObject.put(model.getModelId(), modelObject);
-        }
-
-        // Wrap everything under "models"
-        root.put("models", modelsObject);
-
-        // Save the JSON to file
-        try (FileWriter file = new FileWriter(filePath)) {
-            file.write(root.toString(4));  // Pretty print with indentation
-            file.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void loadModelsFromFile(Stage owner) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Load Models");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JSON Files", "*.json"));
-        File file = fileChooser.showOpenDialog(owner);
-
-        if (file != null) {
-            try {
-                // Update title
-                projectName = file.getName().replaceAll(".json", "");
-                setStageTitle(projectName);
-                String content = new String(Files.readAllBytes(Paths.get(file.toURI())));
-                JSONObject root = new JSONObject(content);
-
-                models.clear();
-
-                // Get the 'models' object (it's a JSONObject, not a JSONArray)
-                JSONObject modelsObject = root.getJSONObject("models");
-
-                // Create a parser instance
-                PrismFileParser parser = new PrismFileParser();
-
-                // Iterate over each model in the models object
-                modelsObject.keySet().forEach(modelId -> {
-                    JSONObject modelJson = modelsObject.getJSONObject(modelId);
-                    String id = modelJson.getString("id");
-                    String filePath = modelJson.getString("fileName");
-
-                    // Create a new Model object
-                    Model model = new Model(id, filePath);
-
-                    // Deserialize parameters if needed
-                    JSONObject parametersObject = modelJson.getJSONObject("parameters");
-
-                    // Deserialize dependency parameters
-                    JSONObject dependencyObject = parametersObject.optJSONObject("dependency");
-                    Set<String> dependencyNames = new HashSet<>();
-                    if (dependencyObject != null) {
-                        dependencyObject.keySet().forEach(depName -> {
-                            JSONObject depObj = dependencyObject.getJSONObject(depName);
-                            String depId = depObj.getString("modelId");
-                            String depDefinition = depObj.getString("property");
-                            model.addDependencyParameter(depName, depId, depDefinition);
-                            dependencyNames.add(depName);  // Track names in the dependency category
-                        });
-                    }
-
-                    // Deserialize environment parameters
-                    JSONObject environmentObject = parametersObject.optJSONObject("environment");
-                    Set<String> environmentNames = new HashSet<>();
-                    if (environmentObject != null) {
-                        environmentObject.keySet().forEach(envName -> {
-                            JSONObject envObj = environmentObject.getJSONObject(envName);
-                            String filePathEnv = envObj.getString("dataFile");
-                            String calculation = envObj.getString("type");
-                            model.addEnvironmentParameter(envName, filePathEnv, calculation);
-                            environmentNames.add(envName);  // Track names in the environment category
-                        });
-                    }
-
-                    // Deserialize internal parameters
-                    JSONObject internalObject = parametersObject.optJSONObject("internal");
-                    Set<String> internalNames = new HashSet<>();
-                    if (internalObject != null) {
-                        internalObject.keySet().forEach(internalName -> {
-                            model.addInternalParameter(internalName);
-                            internalNames.add(internalName);  // Track names in the internal category
-                        });
-                    }
-
-                    // Parse the model's file with PrismFileParser
-                    List<String> parsedParams = null;
-					try {
-						parsedParams = parser.parseFile(filePath);
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-
-                    // Check each parsed parameter
-                    for (String parsedParam : parsedParams) {
-                        // Extract the parameter name (after the "const <type>" part)
-                        String[] parts = parsedParam.split("\\s+");
-                        if (parts.length == 3) {
-                            String paramName = parts[2];  // This is the <name> part
-
-                            // Check if the name exists in any of the categories
-                            if (!dependencyNames.contains(paramName) &&
-                                !environmentNames.contains(paramName) &&
-                                !internalNames.contains(paramName)) {
-
-                                // Create a new UndefinedParameter and add it to the model
-                                UndefinedParameter up = new UndefinedParameter(parsedParam);
-                                model.addUndefinedParameter(up.getParameter());
-                            }
-                        }
-                    }
-
-                    // Add the constructed model to the list
-                    models.add(model);
-                });
-            } catch (IOException e) {
-                showAlert("Error", "Failed to load models: " + e.getMessage());
-            }
-        }
-    }
-
-    private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
-    
-    public void setStageTitle(String newTitle) {
-    	mainStage.setTitle("ULTIMATE Model Manager: " + newTitle);
-    }
-
-    public static void main(String[] args) {
-        launch(args);
-    }
-}
 **/
+}
