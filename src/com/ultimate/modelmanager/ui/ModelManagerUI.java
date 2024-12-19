@@ -1,7 +1,12 @@
 package com.ultimate.modelmanager.ui;
 
-import com.ultimate.modelmanager.model.*;
+import com.ultimatemodelmanager.*;
 import com.ultimate.modelmanager.utils.PrismFileParser;
+import com.ultimatemodelmanager.DependancyParameter;
+import com.ultimatemodelmanager.EnvironmentParameter;
+import com.ultimatemodelmanager.InternalParameter;
+import com.ultimatemodelmanager.Model;
+import com.ultimatemodelmanager.UndefinedParameter;
 
 import javafx.application.Application;
 import javafx.collections.FXCollections;
@@ -98,7 +103,6 @@ public class ModelManagerUI extends Application {
         HBox eParamLabelButton = new HBox(10);
         eParamLabelButton.setAlignment(Pos.CENTER);
         Label environmentParamLabel = new Label("Environment Parameters");
-        // TODO: implement button to access a drop-down listing the undefined params
         Button addEnvironmentParamButton = new Button("+");
         eParamLabelButton.getChildren().addAll(environmentParamLabel, addEnvironmentParamButton);
         ListView<EnvironmentParameter> environmentParamList = new ListView<>();
@@ -109,7 +113,6 @@ public class ModelManagerUI extends Application {
         HBox dParamLabelButton = new HBox(10);
         dParamLabelButton.setAlignment(Pos.CENTER);
         Label dependencyParamLabel = new Label("Dependency Parameters");
-        // TODO: implement button to access a drop-down listing the undefined params
         Button addDependencyParamButton = new Button("+");
         dParamLabelButton.getChildren().addAll(dependencyParamLabel, addDependencyParamButton);
         ListView<DependancyParameter> dependencyParamList = new ListView<>();
@@ -120,7 +123,6 @@ public class ModelManagerUI extends Application {
         HBox iParamLabelButton = new HBox(10);
         iParamLabelButton.setAlignment(Pos.CENTER);
         Label internalParamLabel = new Label("Internal Parameters");
-        // TODO: implement button to access a drop-down listing the undefined params
         Button addInternalParamButton = new Button("+");
         iParamLabelButton.getChildren().addAll(internalParamLabel, addInternalParamButton);
         ListView<InternalParameter> internalParamList = new ListView<>();
@@ -130,7 +132,6 @@ public class ModelManagerUI extends Application {
         definedParamDetails.getChildren().addAll(modelIDFile, environmentParamDetails, dependencyParamDetails, internalParamDetails);
         
         // This will hold the list of undefined parameters
-        // TODO: make this dynamically appear/disappear based on whether list empty or not
         VBox undefinedParamDetails = new VBox(10);
         Label uParamLabel = new Label("Undefined Paramters");
         uParamLabel.setAlignment(Pos.CENTER);
@@ -184,7 +185,6 @@ public class ModelManagerUI extends Application {
             mainStage.close();
         });
         
-        // PROJECT DETAILS LIST DEFINITIONS TODO: add keyboard shortcut to delete
         // ListView to display models
         modelListView.setCellFactory(param -> new ListCell<>() {
             @Override
@@ -222,7 +222,6 @@ public class ModelManagerUI extends Application {
             }
         });
         
-        // TODO: implement the edit and - buttons. Add keyboard shortcut to delete
         // CELL FACTORIES FOR THE DEFINED PARAMETER LISTS
         environmentParamList.setCellFactory(param -> new ListCell<>() {
             @Override
@@ -411,7 +410,7 @@ public class ModelManagerUI extends Application {
         }
     }
     
-    public void saveModelsToFile(List<Model> models, String filePath) {
+    private void saveModelsToFile(List<Model> models, String filePath) {
         JSONObject root = new JSONObject();
         JSONObject modelsObject = new JSONObject();
 
@@ -579,7 +578,7 @@ public class ModelManagerUI extends Application {
         }
     }
     
-    public void setStageTitle(String newTitle) {
+    private void setStageTitle(String newTitle) {
     	mainStage.setTitle(title + newTitle);
     }
     

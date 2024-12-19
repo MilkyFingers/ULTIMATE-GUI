@@ -1,4 +1,4 @@
-package com.ultimate.modelmanager.model;
+package com.ultimatemodelmanager;
 
 public class DependancyParameter {
     private String name;

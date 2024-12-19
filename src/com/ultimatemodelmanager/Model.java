@@ -1,4 +1,4 @@
-package com.ultimate.modelmanager.model;
+package com.ultimatemodelmanager;
 
 import java.util.ArrayList;
 import java.util.List;

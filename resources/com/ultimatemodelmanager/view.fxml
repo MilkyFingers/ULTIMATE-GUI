@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+
+<GridPane xmlns:fx="http://javafx.com/fxml" hgap="10" vgap="10">
+    <!-- Menu Bar -->
+    <MenuBar GridPane.columnSpan="3">
+        <menus>
+            <Menu text="File">
+                <items>
+                    <MenuItem text="Load" fx:id="loadItem"/>
+                    <MenuItem text="Save" fx:id="saveItem"/>
+                    <MenuItem text="Save As" fx:id="saveAsItem"/>
+                    <MenuItem text="Quit" fx:id="quitItem"/>
+                </items>
+            </Menu>
+        </menus>
+    </MenuBar>
+
+    <!-- Project Details (Left Panel) -->
+    <VBox spacing="10" GridPane.columnIndex="0" GridPane.rowIndex="1">
+        <VBox.margin>
+            <Insets top="10" right="10" bottom="10" left="10"/>
+        </VBox.margin>
+        <!-- Model Buttons -->
+        <HBox spacing="10" alignment="CENTER">
+            <Button text="+" fx:id="addModelButton"/>
+            <Button text="↑" fx:id="upButton"/>
+            <Button text="↓" fx:id="downButton"/>
+        </HBox>
+        <!-- Model List View -->
+        <ListView fx:id="modelListView" VBox.vgrow="ALWAYS"/>
+    </VBox>
+
+    <!-- Defined Parameters (Center Panel) -->
+    <VBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="1">
+        <VBox.margin>
+            <Insets top="10" right="10" bottom="10" left="10"/>
+        </VBox.margin>
+        <!-- Model ID and File Path -->
+        <Text text="Model ID:\nFile Path:" fx:id="modelDetails"/>
+        
+        <!-- Environment Parameters -->
+        <VBox spacing="10">
+            <HBox spacing="10" alignment="CENTER">
+                <Label text="Environment Parameters"/>
+                <Button text="+" fx:id="addEnvironmentParamButton"/>
+            </HBox>
+            <ListView fx:id="eParamList"/>
+        </VBox>
+
+        <!-- Dependency Parameters -->
+        <VBox spacing="10">
+            <HBox spacing="10" alignment="CENTER">
+                <Label text="Dependency Parameters"/>
+                <Button text="+" fx:id="addDependencyParamButton"/>
+            </HBox>
+            <ListView fx:id="dParamList"/>
+        </VBox>
+
+        <!-- Internal Parameters -->
+        <VBox spacing="10">
+            <HBox spacing="10" alignment="CENTER">
+                <Label text="Internal Parameters"/>
+                <Button text="+" fx:id="addInternalParamButton"/>
+            </HBox>
+            <ListView fx:id="iParamList"/>
+        </VBox>
+    </VBox>
+
+    <!-- Undefined Parameters (Right Panel) -->
+    <VBox spacing="10" GridPane.columnIndex="2" GridPane.rowIndex="1" VBox.vgrow="ALWAYS">
+        <VBox.margin>
+            <Insets top="10" right="10" bottom="10" left="10"/>
+        </VBox.margin>
+        <Label text="Undefined Parameters" alignment="CENTER"/>
+        <ListView fx:id="uParamList" VBox.vgrow="ALWAYS"/>
+    </VBox>
+
+    <!-- Layout Constraints -->
+    <GridPane.margin>
+        <Insets top="10" right="10" bottom="10" left="10"/>
+    </GridPane.margin>
+    <columnConstraints>
+        <ColumnConstraints hgrow="ALWAYS" />
+        <ColumnConstraints hgrow="ALWAYS" />
+        <ColumnConstraints hgrow="ALWAYS" />
+    </columnConstraints>
+    <rowConstraints>
+        <RowConstraints vgrow="ALWAYS"/>
+    </rowConstraints>
+</GridPane>
