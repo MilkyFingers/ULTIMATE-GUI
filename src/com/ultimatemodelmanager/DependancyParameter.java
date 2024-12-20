@@ -1,6 +1,6 @@
 package com.ultimatemodelmanager;
 
-public class DependancyParameter {
+public class DependancyParameter extends Parameter {
     private String name;
     private String modelID;
     private String definition;

@@ -1,6 +1,6 @@
 package com.ultimatemodelmanager;
 
-public class InternalParameter {
+public class InternalParameter extends Parameter {
 	private String name;
 	
 	public InternalParameter(String name) {

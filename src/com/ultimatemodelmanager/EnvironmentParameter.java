@@ -1,6 +1,6 @@
 package com.ultimatemodelmanager;
 
-public class EnvironmentParameter {
+public class EnvironmentParameter extends Parameter {
     private String name;
     private String filePath;
     private String calculation;

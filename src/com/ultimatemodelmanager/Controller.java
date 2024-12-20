@@ -490,7 +490,7 @@ public class Controller {
         VBox vbox = new VBox(5);
 
         // Create HBox for f1 with buttons
-        HBox f1Box = createHBoxForF1(f1);
+        HBox f1Box = createHBoxForF1(f1, item);
 
         // Create a VBox for f2 and f3 with indentation and bullets
         VBox subParamsBox = createSubParamsBox(f2, f3);
@@ -512,7 +512,7 @@ public class Controller {
         VBox vbox = new VBox(5);
 
         // Create HBox for f1 with buttons
-        HBox f1Box = createHBoxForF1(f1);
+        HBox f1Box = createHBoxForF1(f1, item);
 
         // Create a VBox for f2 and f3 with indentation and bullets
         VBox subParamsBox = createSubParamsBox(f2, f3);
@@ -533,7 +533,7 @@ public class Controller {
         VBox vbox = new VBox(5);
 
         // Create HBox for f1 with buttons
-        HBox f1Box = createHBoxForF1(f1);
+        HBox f1Box = createHBoxForF1(f1, item);
 
         // Create a VBox for f2 and f3 with indentation and bullets
         VBox subParamsBox = createSubParamsBox(f2, f3);
@@ -543,7 +543,7 @@ public class Controller {
         return vbox;
     }
     
-    private HBox createHBoxForF1(String f1) {
+    private HBox createHBoxForF1(String f1, Parameter item) {
         HBox f1Box = new HBox(10);
         Label f1Label = new Label(f1);
         f1Label.setStyle("-fx-font-weight: bold;"); // Make f1 bold
@@ -551,7 +551,7 @@ public class Controller {
         Button editButton = new Button("Edit");
 
         // Add event handlers for the buttons
-        minusButton.setOnAction(e -> handleRemoveItem());
+        minusButton.setOnAction(e -> handleRemoveItem(item));
         editButton.setOnAction(e -> handleEditItem());
 
         f1Box.getChildren().addAll(f1Label, minusButton, editButton);
@@ -568,8 +568,14 @@ public class Controller {
         return subParamsBox;
     }
 
-    private void handleRemoveItem() {
+    private void handleRemoveItem(Parameter item) {
         // TODO: Implement action handler for the remove button
+    	if (item instanceof EnvironmentParameter) {
+    		String name = item.getName();
+    		getCurrentModel().removeEnvironmentParamter((EnvironmentParameter) item);
+    		getCurrentModel().addUndefinedParameter(name);
+    	}
+    	updateModelDetails(getCurrentModel());
     }
 
     private void handleEditItem() {

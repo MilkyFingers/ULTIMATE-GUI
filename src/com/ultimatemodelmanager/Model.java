@@ -159,4 +159,13 @@ public class Model {
     public void removeUndefinedParamter(UndefinedParameter toRemove) {
     	undefinedParameters.remove(toRemove);
     }
+    
+    /**
+     * Removes the given <EnvironmentParameter> from the models List
+     * 
+     * @param the <EnvironmentParameter> to be removed
+     */
+    public void removeEnvironmentParamter(EnvironmentParameter toRemove) {
+    	environmentParameters.remove(toRemove);
+    }
 }
