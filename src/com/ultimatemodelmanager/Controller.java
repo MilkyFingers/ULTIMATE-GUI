@@ -15,6 +15,7 @@ import com.ultimate.modelmanager.utils.PrismFileParser;
 
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -62,24 +63,13 @@ public class Controller {
     // Initialisation method
     @FXML
     private void initialize() {
-        // Set up initial behaviour and bindings:
-    	
-    	// Behaviour and bindings for model list
-    	modelListView.setItems(models);
-        modelListView.setCellFactory(param -> new ListCell<>() {
-            @Override
-            protected void updateItem(Model item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? null : item.getModelId());
-            }
-        });
-        // Add a listener to handle selection changes to model list
-        modelListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                updateModelDetails(newValue); // Call method with the newly selected model
-            }
-        });
         
+    	// Set up initial behaviour and bindings:
+    	setUpMenuItems();
+    	setUpButtons();
+    	setUpModelListView();
+        
+    	// TODO: pull these out into separate method/class
         // Behaviour and bindings for eParamList
         eParamList.setCellFactory(param -> new ListCell<>() {
             @Override
@@ -133,111 +123,66 @@ public class Controller {
                 }
             }
         });
-
-        // Add event handlers
+    }
+    
+    private void setUpButtons() {
         addModelButton.setOnAction(e -> handleAddModel(mainStage));
         upButton.setOnAction(e -> handleUpButton());
         downButton.setOnAction(e -> handleDownButton());
+        addEnvironmentParamButton.setOnAction(e -> handleAddEParam(mainStage, getCurrentModel()));
+        addDependencyParamButton.setOnAction(e -> handleAddDParam());
+        addInternalParamButton.setOnAction(e -> handleAddIParam());
+    }
+    
+    private void setUpModelListView() {
+    	// Behaviour and bindings for model list
+    	modelListView.setItems(models);
+        modelListView.setCellFactory(param -> new ListCell<>() {
+            @Override
+            protected void updateItem(Model item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.getModelId());
+            }
+        });
+        // Add a listener to handle selection changes to model list
+        modelListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                updateModelDetails(newValue); // Call method with the newly selected model
+            }
+        });
+    }
+    
+    private Model getCurrentModel() {
+    	return modelListView.getSelectionModel().getSelectedItem();
+    }
+    
+    private void setUpMenuItems() {
         loadItem.setOnAction(e -> handleLoad(mainStage));
         saveItem.setOnAction(e -> handleSave());
         saveAsItem.setOnAction(e -> handleSaveAs());
         quitItem.setOnAction(e -> handleQuit());
-        addEnvironmentParamButton.setOnAction(e -> handleAddEParam());
-        addDependencyParamButton.setOnAction(e -> handleAddDParam());
-        addInternalParamButton.setOnAction(e -> handleAddIParam());
     }
     
     private void handleAddModel(Stage mainStage) {
         Stage editorStage = new Stage();
         editorStage.setTitle("Add New Model"); // Always adding a new model
+        
+        // create a AddModelController instance to handle dialog
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/ultimatemodelmanager/AddModelDialog.fxml"));
+        loader.setController(new AddModelController(mainStage, editorStage, models));
+        
+        // loading root element of AddModelDialog.fxml
+        VBox editorLayout = null;
+		try {
+			editorLayout = loader.load();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
-        VBox editorLayout = new VBox(10);
-        editorLayout.setPadding(new Insets(10));
-
-        // Create text fields for Model ID and File Path
-        TextField idField = new TextField();
-        idField.setPromptText("Model ID");
-
-        TextField filePathField = new TextField();
-        filePathField.setPromptText("File Path");
-
-        // Open file dialog when the editor window is shown
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All Files", "*.*"));
-
-        // Open a file dialog to select a file and populate fields
-        fileChooser.setTitle("Select Model File");
-        File selectedFile = fileChooser.showOpenDialog(mainStage);
-        if (selectedFile != null) {
-            // Set the file path and extract the model ID from the file name
-            String filePath = selectedFile.getAbsolutePath();
-            String modelId = selectedFile.getName().replaceFirst("[.][^.]+$", ""); // Remove file extension
-            idField.setText(modelId);
-            filePathField.setText(filePath);
-        }
-
-        // Save Button
-        Button saveButton = new Button("Save");
-        saveButton.setOnAction(e -> {
-            String id = idField.getText().trim();
-            String filePath = filePathField.getText().trim();
-
-            // Validation: Ensure ID and File Path are not empty
-            if (id.isEmpty() || filePath.isEmpty()) {
-                showAlert("Validation Error", "Both ID and file path are required.");
-                return;
-            }
-
-            // Create a new model and add it to the list
-            Model newModel = new Model(id, filePath);
-            models.add(newModel); // Add the newly created model to the model list
-            
-            // Create a parser instance
-            PrismFileParser parser = new PrismFileParser();
-            // Parse the model's file with PrismFileParser
-            List<String> undefinedParams = null;
-            try {
-                undefinedParams = parser.parseFile(filePath);
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
-            
-            // Check each parsed parameter and add to the model
-            if (undefinedParams != null) {
-                for (String param : undefinedParams) {
-                    // Extract the parameter name (after the "const <type>" part)
-                    String[] parts = param.split("\\s+");
-                    if (parts.length == 3) {
-                        String paramName = parts[2];  // This is the <name> part
-
-                        // Create a new UndefinedParameter and add it to the model
-                        UndefinedParameter up = new UndefinedParameter(paramName);
-                        newModel.addUndefinedParameter(up.getParameter());
-                    }
-                }
-            }
-
-            // Close the editor window after saving
-            editorStage.close();
-        });
-
-        // Add elements to the layout
-        editorLayout.getChildren().addAll(
-            new Label("Model ID:"), idField,
-            new Label("File Path:"), filePathField,
-            saveButton
-        );
-
-        // Set preferred size for layout
-        editorLayout.setPrefSize(400, 300); // Adjust width and height as needed
-
-        // Set the layout and display the editor stage
+        // Set up the scene
         Scene scene = new Scene(editorLayout);
         editorStage.setScene(scene);
-        
         editorStage.initOwner(mainStage);
-        editorStage.setWidth(400); // Set width of the stage
-        editorStage.setHeight(300); // Set height of the stage
         editorStage.showAndWait();
     }
     
@@ -259,6 +204,7 @@ public class Controller {
         }
     }
     
+    // TODO: re-factor (create file dialog method)
     private void handleLoad(Stage mainStage) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Load Models");
@@ -383,6 +329,7 @@ public class Controller {
         }
     }
     
+    // TODO: re-factor (create file dialog method)
     private void handleSaveAs() {
         // Convert ObservableList to List
         List<Model> modelList = models;
@@ -402,8 +349,27 @@ public class Controller {
     	mainStage.close();
     }
     
-    private void handleAddEParam() {
-    	// TODO handle adding e parameter
+    private void handleAddEParam(Stage mainStage, Model currentModel) {
+        Stage editorStage = new Stage();
+        editorStage.setTitle("Add New Environment Parameter");
+        
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/ultimatemodelmanager/AddEParamDialog.fxml"));
+        loader.setController(new AddEParamController(editorStage, currentModel));
+        
+        VBox editorLayout = null;
+		try {
+			editorLayout = loader.load();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+        // Set up the scene
+        Scene scene = new Scene(editorLayout);
+        editorStage.setScene(scene);
+        editorStage.initOwner(mainStage);
+        editorStage.showAndWait();
+        
+        updateModelDetails(currentModel);
     }
     
     private void handleAddDParam() {
@@ -450,6 +416,7 @@ public class Controller {
         }
     }
     
+    // TODO: re-factor (create file dialog method)
     private void saveModelsToFile(List<Model> models, String filePath) {
         JSONObject root = new JSONObject();
         JSONObject modelsObject = new JSONObject();
@@ -616,5 +583,4 @@ public class Controller {
  * Implement adding parameters from drop-down list of undefined parameters
  * Hide/showing undefined parameters section when empty/non-empty
  * Ensure window cannot be made too small to obscure the GUI
- * Separate all java-code for creating widgets in this class into new FXML files -> make sub controller classes if needed
  */

@@ -17,7 +17,7 @@ public class Main extends Application {
         Stage mainStage = stage;
         
         // Load the FXML file and set the controller
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/ultimatemodelmanager/view1.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/ultimatemodelmanager/MainView.fxml"));
         
         // Inject models into the controller
         loader.setController(new Controller(mainStage, models));
