@@ -27,7 +27,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 public class Controller {
@@ -133,7 +132,14 @@ public class Controller {
     }
     
     private void setUpButtons() {
-        addModelButton.setOnAction(e -> handleAddModel(mainStage));
+        addModelButton.setOnAction(e -> {
+			try {
+				handleAddModel(mainStage);
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		});
         upButton.setOnAction(e -> handleUpButton());
         downButton.setOnAction(e -> handleDownButton());
         addEnvironmentParamButton.setOnAction(e -> handleAddEParam(mainStage, getCurrentModel()));
@@ -170,26 +176,26 @@ public class Controller {
         quitItem.setOnAction(e -> handleQuit());
     }
     
-    private void handleAddModel(Stage mainStage) {
-        Stage editorStage = new Stage();
-        editorStage.setTitle("Add New Model"); // Always adding a new model
+    private Stage createEditorStage(Stage owner, String stageName) {
+    	Stage editorStage = new Stage();
+    	editorStage.setTitle(stageName);
+    	editorStage.initOwner(owner);
+    	return editorStage;
+    }
+    
+    private void handleAddModel(Stage mainStage) throws IOException {
+        Stage editorStage = createEditorStage(mainStage, "Add New Model");
         
         // create a AddModelController instance to handle dialog
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/ultimatemodelmanager/AddModelDialog.fxml"));
         loader.setController(new AddModelController(mainStage, editorStage, models));
         
         // loading root element of AddModelDialog.fxml
-        VBox editorLayout = null;
-		try {
-			editorLayout = loader.load();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+        VBox editorLayout = loader.load();
 
         // Set up the scene
         Scene scene = new Scene(editorLayout);
         editorStage.setScene(scene);
-        editorStage.initOwner(mainStage);
         editorStage.showAndWait();
     }
     
@@ -547,7 +553,6 @@ public class Controller {
     private void handleEditItem(Parameter item) {
         // TODO: Implement action handler for the edit button
         Stage editorStage = new Stage();
-        editorStage.initModality(Modality.APPLICATION_MODAL);
         editorStage.setTitle("Edit Environment Parameter");
         
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/ultimatemodelmanager/EditEPAramDialog.fxml"));
@@ -577,4 +582,5 @@ public class Controller {
  * Hide/showing undefined parameters section when empty/non-empty
  * Ensure window cannot be made too small to obscure the GUI
  * Do not allow adding of undefined when list empty (remove "+" buttons?)
+ * prevent interaction with main window when dialog open
  */
