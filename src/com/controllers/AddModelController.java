@@ -1,4 +1,4 @@
-package com.ultimatemodelmanager;
+package com.controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import com.parameters.Model;
+import com.parameters.UndefinedParameter;
 import com.ultimate.modelmanager.utils.PrismFileParser;
 
 /**
@@ -112,7 +114,7 @@ public class AddModelController {
                     if (parts.length == 3) {
                         String paramName = parts[2];
                         UndefinedParameter up = new UndefinedParameter(paramName);
-                        newModel.addUndefinedParameter(up.getParameter());
+                        newModel.addUndefinedParameter(up.getName());
                     }
                 }
             }

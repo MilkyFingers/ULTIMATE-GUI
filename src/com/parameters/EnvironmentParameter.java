@@ -1,4 +1,4 @@
-package com.ultimatemodelmanager;
+package com.parameters;
 
 public class EnvironmentParameter extends Parameter {
     private String name;
@@ -12,6 +12,10 @@ public class EnvironmentParameter extends Parameter {
     }
     
     // GETTER METHODS
+    
+    public String getType() {
+    	return "e";
+    }
     
     public String getName() {
     	return this.name;	

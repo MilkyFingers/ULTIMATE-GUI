@@ -1,18 +1,16 @@
-package com.ultimatemodelmanager;
+package com.controllers;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import com.parameters.EnvironmentParameter;
+import com.parameters.Model;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
-public class AddEParamController {
+public class EditEParamController {
 	
-	@FXML
-	private ChoiceBox<UndefinedParameter> undefinedParameters;
 	@FXML
 	private TextField eParamName;
 	@FXML
@@ -24,28 +22,23 @@ public class AddEParamController {
 	
 	private Stage editorStage;
 	private Model model;
+	private EnvironmentParameter oldParam;
 	
-	public AddEParamController(Stage editorStage, Model model) {
+	public EditEParamController(Stage editorStage, Model model, EnvironmentParameter oldParam) {
 		this.editorStage = editorStage;
 		this.model = model;
+		this.oldParam = oldParam;
 	}
 	
 	@FXML
 	public void initialize() {
 		save.setOnAction(e -> saveEParam());
-		// set the choice box options based
-		ObservableList<UndefinedParameter> observableItems = FXCollections.observableArrayList(model.getUndefinedParameters());
-        undefinedParameters.setItems(observableItems);  // Set the list as items for the ChoiceBox
-        undefinedParameters.setOnAction(e -> getName());
-	}
-	
-	private void getName() {
-		eParamName.setText(undefinedParameters.getValue().getParameter());
+		eParamName.setText(oldParam.getName());
+		eParamFP.setText(oldParam.getFilePath());
+		eParamCalc.setText(oldParam.getCalculation());
 	}
 	
 	private void saveEParam() {
-		// remove the parameter
-		model.removeUndefinedParamter(undefinedParameters.getValue());
 		// get values to create e param
 		String name = eParamName.getText().trim();
 		String file = eParamFP.getText().trim();
@@ -57,7 +50,9 @@ public class AddEParamController {
             return;
         }
         
-        model.addEnvironmentParameter(name, file, calc);
+        EnvironmentParameter newParam = new EnvironmentParameter(name, file, calc);
+        
+        model.replaceParameter(oldParam, newParam);
         editorStage.close();
 
 	}

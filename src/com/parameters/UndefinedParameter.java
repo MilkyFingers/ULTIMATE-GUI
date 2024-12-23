@@ -1,17 +1,20 @@
-package com.ultimatemodelmanager;
+package com.parameters;
 
-public class UndefinedParameter {
+public class UndefinedParameter extends Parameter {
 	private String parameter;
 	
 	public UndefinedParameter(String parameter) {
 		this.parameter = parameter;
 	}
 	
-	public String getParameter() {
+	public String getType() {
+		return "u";
+	}
+	public String getName() {
 		return this.parameter;
 	}
 	
 	public String toString() {
-		return getParameter();
+		return getName();
 	}
 }

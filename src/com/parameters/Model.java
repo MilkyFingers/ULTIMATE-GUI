@@ -1,4 +1,4 @@
-package com.ultimatemodelmanager;
+package com.parameters;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -167,5 +167,12 @@ public class Model {
      */
     public void removeEnvironmentParamter(EnvironmentParameter toRemove) {
     	environmentParameters.remove(toRemove);
+    }
+    
+    public void replaceParameter(Parameter oldParam, Parameter newParam) {
+    	if (oldParam.getType() == "e") {
+    		int index = environmentParameters.indexOf(oldParam);
+            environmentParameters.set(index, (EnvironmentParameter) newParam);
+    	}
     }
 }

@@ -1,4 +1,4 @@
-package com.ultimatemodelmanager;
+package com.controllers;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -11,6 +11,12 @@ import java.util.Set;
 
 import org.json.JSONObject;
 
+import com.parameters.DependancyParameter;
+import com.parameters.EnvironmentParameter;
+import com.parameters.InternalParameter;
+import com.parameters.Model;
+import com.parameters.Parameter;
+import com.parameters.UndefinedParameter;
 import com.ultimate.modelmanager.utils.PrismFileParser;
 
 import javafx.collections.ObservableList;
@@ -21,6 +27,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 public class Controller {
@@ -297,7 +304,7 @@ public class Controller {
 
                                 // Create a new UndefinedParameter and add it to the model
                                 UndefinedParameter up = new UndefinedParameter(paramName);
-                                model.addUndefinedParameter(up.getParameter());
+                                model.addUndefinedParameter(up.getName());
                             }
                         }
                     }
@@ -309,6 +316,7 @@ public class Controller {
                 showAlert("Error", "Failed to load models: " + e.getMessage());
             }
         }
+      handleDownButton(); // so a model is selected after loading
     }
     
     private void showAlert(String title, String message) {
@@ -479,7 +487,7 @@ public class Controller {
         }
     }
     
-    private VBox createCellLayout(EnvironmentParameter item) {
+    private VBox createCellLayout(Parameter item) {
         // Parse the item into fields
         String[] fields = item.toString().split(",");
         String f1 = fields.length > 0 ? fields[0] : "";
@@ -501,48 +509,6 @@ public class Controller {
     	
     }
     
-    private VBox createCellLayout(DependancyParameter item) {
-        // Parse the item into fields
-        String[] fields = item.toString().split(",");
-        String f1 = fields.length > 0 ? fields[0] : "";
-        String f2 = fields.length > 1 ? fields[1] : "";
-        String f3 = fields.length > 2 ? fields[2] : "";
-
-        // Create a VBox for the overall layout
-        VBox vbox = new VBox(5);
-
-        // Create HBox for f1 with buttons
-        HBox f1Box = createHBoxForF1(f1, item);
-
-        // Create a VBox for f2 and f3 with indentation and bullets
-        VBox subParamsBox = createSubParamsBox(f2, f3);
-
-        // Add the HBox and VBox to the main VBox
-        vbox.getChildren().addAll(f1Box, subParamsBox);
-        return vbox;
-    }
-    
-    private VBox createCellLayout(InternalParameter item) {
-        // Parse the item into fields
-        String[] fields = item.toString().split(",");
-        String f1 = fields.length > 0 ? fields[0] : "";
-        String f2 = fields.length > 1 ? fields[1] : "";
-        String f3 = fields.length > 2 ? fields[2] : "";
-
-        // Create a VBox for the overall layout
-        VBox vbox = new VBox(5);
-
-        // Create HBox for f1 with buttons
-        HBox f1Box = createHBoxForF1(f1, item);
-
-        // Create a VBox for f2 and f3 with indentation and bullets
-        VBox subParamsBox = createSubParamsBox(f2, f3);
-
-        // Add the HBox and VBox to the main VBox
-        vbox.getChildren().addAll(f1Box, subParamsBox);
-        return vbox;
-    }
-    
     private HBox createHBoxForF1(String f1, Parameter item) {
         HBox f1Box = new HBox(10);
         Label f1Label = new Label(f1);
@@ -552,7 +518,7 @@ public class Controller {
 
         // Add event handlers for the buttons
         minusButton.setOnAction(e -> handleRemoveItem(item));
-        editButton.setOnAction(e -> handleEditItem());
+        editButton.setOnAction(e -> handleEditItem(item));
 
         f1Box.getChildren().addAll(f1Label, minusButton, editButton);
         return f1Box;
@@ -578,8 +544,29 @@ public class Controller {
     	updateModelDetails(getCurrentModel());
     }
 
-    private void handleEditItem() {
+    private void handleEditItem(Parameter item) {
         // TODO: Implement action handler for the edit button
+        Stage editorStage = new Stage();
+        editorStage.initModality(Modality.APPLICATION_MODAL);
+        editorStage.setTitle("Edit Environment Parameter");
+        
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/ultimatemodelmanager/EditEPAramDialog.fxml"));
+        loader.setController(new EditEParamController(editorStage, getCurrentModel(), (EnvironmentParameter) item));
+        
+        VBox editorLayout = null;
+		try {
+			editorLayout = loader.load();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+        // Set up the scene
+        Scene scene = new Scene(editorLayout);
+        editorStage.setScene(scene);
+        editorStage.initOwner(mainStage);
+        editorStage.showAndWait();
+        
+        updateModelDetails(getCurrentModel());
     }
 }
 // TODO task list
@@ -589,4 +576,5 @@ public class Controller {
  * Implement adding parameters from drop-down list of undefined parameters
  * Hide/showing undefined parameters section when empty/non-empty
  * Ensure window cannot be made too small to obscure the GUI
+ * Do not allow adding of undefined when list empty (remove "+" buttons?)
  */

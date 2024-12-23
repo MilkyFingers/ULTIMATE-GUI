@@ -1,4 +1,4 @@
-package com.ultimatemodelmanager;
+package com.parameters;
 
 public class DependancyParameter extends Parameter {
     private String name;
@@ -12,6 +12,10 @@ public class DependancyParameter extends Parameter {
     }
     
     // GETTER METHODS
+    
+    public String getType() {
+    	return "d";
+    }
     
     public String getName() {
     	return this.name;	

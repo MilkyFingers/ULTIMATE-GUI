@@ -1,4 +1,4 @@
-package com.ultimatemodelmanager;
+package com.parameters;
 
 public class InternalParameter extends Parameter {
 	private String name;
@@ -9,6 +9,10 @@ public class InternalParameter extends Parameter {
 	
     // GETTER METHODS
     
+	public String getType() {
+		return "i";
+	}
+	
     public String getName() {
     	return this.name;	
     }
